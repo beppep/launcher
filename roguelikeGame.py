@@ -4,6 +4,7 @@ import random
 import os
 import math
 
+
 def roguelikeGameMain():
 
     EZ = 1
@@ -34,6 +35,7 @@ def roguelikeGameMain():
     pygame.init()
     info = pygame.display.Info() # You have to call this before pygame.display.set_mode()
     display = (info.current_w,info.current_h)
+    print(display)
     gameDisplay = pygame.display.set_mode(display,)# pygame.FULLSCREEN)
     gameDisplay.blit(pygame.transform.scale(pygame.image.load(os.path.join(filepath, "textures", "loading.png")),display),(0,0))
     pygame.display.update()
@@ -43,7 +45,7 @@ def roguelikeGameMain():
     #myfont = pygame.font.SysFont('Calibri', 20) #for pyinstaller
     myfont = pygame.font.Font(pygame.font.get_default_font(), 20)
 
-    boost = 0
+    boost = 5
 
     class Sound():
         volume = 1
@@ -71,9 +73,9 @@ def roguelikeGameMain():
         horrorSound = pygame.mixer.Sound(os.path.join(SOUND_PATH, "panic.wav"))
         horrorSound.set_volume(volume*0.5)
         
-        pygame.mixer.music.load(os.path.join(SOUND_PATH, "Age of War.wav")) #must be wav 16bit and stuff?
-        pygame.mixer.music.set_volume(volume*0.05)
-        time.sleep(0.1)
+        pygame.mixer.music.load(os.path.join(SOUND_PATH, "junglemusic.wav")) #must be wav 16bit and stuff?
+        pygame.mixer.music.set_volume(volume*0.25)
+        time.sleep(0.01)
         pygame.mixer.music.play(-1)
 
     def blitRotate(surf,image, pos, originPos, angle):
@@ -339,6 +341,8 @@ def roguelikeGameMain():
             Game.playing_a_run = False
             for projCls in [Sapphire,Ruby,Emerald,Bullet,FireBullet,Orb,FireOrb]:
                 projCls.changeSize(1)
+
+
             winAnimation(lose = lose)
 
         def gatherAllies(self):
@@ -637,9 +641,9 @@ def roguelikeGameMain():
             for target in targets:
                 alreadyHit.append(target)
                 if(target.burning>0):
-                    damage = (self.attackDamage+self.furyBuff)*(1+self.fireStar)
+                    damage = (self.attackDamage+self.furyBuff*0.5)*(1+self.fireStar)
                 else:
-                    damage = self.attackDamage+self.furyBuff
+                    damage = self.attackDamage+self.furyBuff*0.5
                 target.hurt(damage)
                 if self.lifeSteal>0:
                     self.heal(damage*self.lifeSteal)
@@ -735,7 +739,7 @@ def roguelikeGameMain():
     class Warrior(Player):
         unlocked = True
         unlock_description = "This character should always be unlocked. Please contact Bror Persson 0709419442 to fix your save-file."
-        description = ["The Warriors are sword-wielding brawlers that often venture into the dungeon.",
+        description = ["The Warriors are sword-wielding brawlers who often venture into the dungeon.",
             "",
             "Abilities:",
             " J : A classic sword attack.",
@@ -859,7 +863,7 @@ def roguelikeGameMain():
             super().getKill(enemy)
             if(self.furyTime>0):
                 self.furyBuff+=0.5
-            self.furyTime=180
+            self.furyTime=300
     class Ranger(Player):
         unlocked = False
         unlock_description = "Complete the game as a Warrior to unlock."
@@ -2405,6 +2409,10 @@ def roguelikeGameMain():
             self.arms = 8
             self.firstMoveSpores = 1
 
+            pygame.mixer.music.stop()  # Stop the current song
+            pygame.mixer.music.load(os.path.join(SOUND_PATH, "bosstheme.wav"))  # Load the new song
+            pygame.mixer.music.play(-1)  # Play the new song in a loop
+
         def freeze(self):
             if game.player.freezeDamage:
                 Sound.glassSound.play()
@@ -2476,12 +2484,7 @@ def roguelikeGameMain():
         def die(self):
             super().die()
             game.room.enemies = []
-            pressed = pygame.key.get_pressed()
-            if pressed[pygame.K_b]:
-                game.room.items.append(StairCase(self.x,self.y))
-                game.depth = 0
-            else:
-                game.room.items.append(StairCase2(self.x,self.y))
+            game.room.items.append(StairCase2(self.x,self.y))
             print("you win")
 
     class Boss2(Enemy):
@@ -2505,6 +2508,11 @@ def roguelikeGameMain():
             self.xv = 0
             self.yv = 1
             game.room.enemies.append(self.tail)
+
+            
+            pygame.mixer.music.stop()  # Stop the current song
+            pygame.mixer.music.load(os.path.join(SOUND_PATH, "bosstheme.wav"))  # Load the new song
+            pygame.mixer.music.play(-1)  # Play the new song in a loop
 
         def freeze(self):
             if game.player.freezeDamage:
@@ -2629,13 +2637,9 @@ def roguelikeGameMain():
         def die(self):
             super().die()
             game.room.enemies = []
-            pressed = pygame.key.get_pressed()
-            if pressed[pygame.K_b]:
-                game.room.items.append(StairCase(self.x,self.y))
-                game.depth = 0
-            else:
-                game.room.items.append(StairCase2(self.x,self.y))
+            game.room.items.append(StairCase2(self.x,self.y))
             print("you win")
+
     class Boss2_tail(Enemy):
         
         radius = 32
@@ -3042,8 +3046,21 @@ def roguelikeGameMain():
         image = loadTexture("items/staircase.png", imageSize)
         showItem=False
         def pickup(self):
-            game.gameOver()
-            
+            pressed = pygame.key.get_pressed()
+            if pressed[pygame.K_b]:
+                game.depth = 0
+                game.enterFloor(Floor(roomPresets))
+                game.player.x = self.x
+                game.player.y = self.y
+                game.gatherAllies()
+                for i in range(min(50, game.player.coins*game.player.piggyBank//2)):
+                    game.room.items.append(Coin(random.randint(100,400),random.randint(100,400)))
+                pygame.mixer.music.stop()  # Stop the current song
+                pygame.mixer.music.load(os.path.join(SOUND_PATH, "junglemusic.wav"))  # Load the new song
+                pygame.mixer.music.play(-1)  # Play the new song in a loop
+            else:
+                game.gameOver()
+                
     class Coin(Item):
 
         imageSize = 128
@@ -3289,8 +3306,8 @@ def roguelikeGameMain():
                 projCls.changeSize(game.player.projectileSize)
 
     directionHash={0:[0,-1],1:[1,0],2:[0,1],3:[-1,0]}
-    goodItems=[PiggyBank,Bouncer,ShockLink,FireSword,MagicWand,ColdCore,Icecrystal,WaterFace,VampireBite,JesterHat,Carpet,ProjectileEnlarger]
-    badItems=[Fruit,Stick,FireStar,Fan,IceShield,Mosscrystal,Crystal,Magnet,FireRope,Library]
+    goodItems=[Stick,PiggyBank,Bouncer,ShockLink,FireSword,MagicWand,ColdCore,Icecrystal,WaterFace,VampireBite,JesterHat,Carpet]
+    badItems=[Fruit,FireStar,Fan,IceShield,Mosscrystal,Crystal,Magnet,FireRope,Library,ProjectileEnlarger]
     allItems=goodItems+badItems
     roomPresets=[
         [[
@@ -3597,6 +3614,10 @@ def roguelikeGameMain():
             pygame.display.update()
             clock.tick(60)
 
+        pygame.mixer.music.stop()  # Stop the current song
+        pygame.mixer.music.load(os.path.join(SOUND_PATH, "junglemusic.wav"))  # Load the new song
+        pygame.mixer.music.play(-1)  # Play the new song in a loop
+
     characterSelect = CharacterSelect()
 
     Game.playing_a_run = False
@@ -3628,9 +3649,13 @@ def roguelikeGameMain():
 
         pygame.display.flip()
         clock.tick(60)
-        
-    pygame.quit()
-    #quit() #remove for pyinstaller
 
-    #ddddddddd         ddddddddd            aa  bssssss  
-    #aasssddddddSSSSSSDDDDDddddddddddddADDDDDDDDDDDDD
+    return
+
+if __name__ == "__main__":
+    roguelikeGameMain()
+    pygame.quit() #in name==main__ becuase of  brors pygame launcher
+    #quit() #remove for pyinstaller i think?
+
+#ddddddddd         ddddddddd            aa  bssssss  
+#aasssddddddSSSSSSDDDDDddddddddddddADDDDDDDDDDDDD

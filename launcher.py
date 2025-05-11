@@ -3,32 +3,46 @@ import time
 import os
 import pygame_gui
 
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 clock = pygame.time.Clock()
-SOUND_PATH = os.path.join("assets", "sounds")
 pygame.init()
 pygame.display.init()
 
-infoObject = pygame.display.Info()
-#SCREENSIZE = (1000, 600)
-SCREENSIZE = (infoObject.current_w, infoObject.current_h)
 FRAMERATE = 60
 
+infoObject = pygame.display.Info()
+SCREENSIZE = (infoObject.current_w, infoObject.current_h)
+#print(SCREENSIZE)
 gameDisplay = pygame.display.set_mode(SCREENSIZE)
-pygame.display.set_caption("Bror's pyhtni game launher!!!!!")
+
+pygame.display.set_caption("brors python game launcher")
 #pygame.display.set_icon(pygame.image.load(os.path.join("assets", "textures", "player", "player.png")))
+
+mainImage = pygame.image.load(os.path.join("LAUNCHERCOVERART.png"))
+mainImage = pygame.transform.scale(mainImage, SCREENSIZE)
 
 managers={
     "menu":pygame_gui.UIManager(SCREENSIZE),
 }
 
+pygame.font.init() # you have to call this at the start, 
+myfont = pygame.font.SysFont('Calibri', 100)
+myfont2 = pygame.font.SysFont('Calibri', 20)
+somethingCrashed = 0
+
+dagames = ["Fighting Game","House Review","Roguelike Game","Space Shooter","Jumping Game","Quit"]
+dahelptexts = ["1-2 Players.\n\nA classic fighting game with many characters!\n\n(Press number keys to change the controls)\n(Controller support maybe)","1 Player.\n\nA relaxing stressful game about building and selling houses.","1 Player.\n\nA classic top-down roguelike.","1 Player.\n\nShoot ships in space and stuff.\n\n(Controller support)","2 Players.\n\nA cool game about jumping over each other","0 Players.\n\nNot very fun. Not recommended."]
+helptext = ""
 
 buttons = []
-dagames = ["basinDrifter","houseReview","roguelikeGame","CrushingGame"]
+top_left_buttons = (400,300)
 for i in range(len(dagames)):
-    lvls_per_row = 4
-    pos = (100 + (i%lvls_per_row)*200, 100 + (i//lvls_per_row)*150)
+    lvls_per_row = 2
+    pos = (top_left_buttons[0] + (i%lvls_per_row)*200, top_left_buttons[1] + (i//lvls_per_row)*150)
     buttons.append(pygame_gui.elements.UIButton(relative_rect=pygame.Rect(pos, (150, 100)),text=dagames[i], manager=managers["menu"]))
+help_textbox = pygame_gui.elements.UITextBox(relative_rect=pygame.Rect(top_left_buttons[0] + lvls_per_row*200, top_left_buttons[1], 200, 400),html_text="",manager=managers["menu"])
+
 
 jump_out = False
 while jump_out == False:
@@ -45,31 +59,73 @@ while jump_out == False:
             if event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                 jump_out = True
 
+        if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
+            helptext = dahelptexts[buttons.index(event.ui_element)]
+            help_textbox.html_text=helptext
+            help_textbox.rebuild()
+        if event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+            helptext = ""
+            help_textbox.html_text=helptext
+            help_textbox.rebuild()
+
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             #buttons
-            if event.ui_element == buttons[0]:
-                import basinDrifter
-                basinDrifter.basinDrifterMain()
-            if event.ui_element == buttons[1]:
-                import houseReview
-                houseReview.houseReviewMain()
-            if event.ui_element == buttons[2]:
-                import roguelikeGame
-                roguelikeGame.roguelikeGameMain()
-            if event.ui_element == buttons[3]:
-                import fightingGame
-                fightingGame.fightingGameMain()
+            try:
+                if event.ui_element == buttons[0]:
+                    import fightingGame
+                    fightingGame.fightingGameMain()
+                elif event.ui_element == buttons[1]:
+                    import houseReview
+                    houseReview.houseReviewMain()
+                elif event.ui_element == buttons[2]:
+                    import roguelikeGame
+                    roguelikeGame.roguelikeGameMain()
+                elif event.ui_element == buttons[3]:
+                    import blastGame
+                    blastGame.blastGameMain()
+                elif event.ui_element == buttons[4]:
+                    import jumpingGame
+                    jumpingGame.jumpingGameMain()
+                elif event.ui_element == buttons[5]:
+                    jump_out = True
+                else:
+                    print("watafaaack?!")
+                somethingCrashed = False
+            except Exception as e:
+                somethingCrashed = e
+                errortextsurface = myfont2.render("Sorry! It crashed... Please tell me in what situation!   Error: "+str(e), True, (220,220,220))
             gameDisplay = pygame.display.set_mode(SCREENSIZE)
-            gameDisplay.fill((0,0,0))
-            pygame.mixer.music.stop()
+            try:
+                pygame.mixer.music.stop()
+            except:
+                pass
 
+    gameDisplay.blit(mainImage, (0,0))
     manager.draw_ui(gameDisplay)
+    maintextsurface = myfont.render("BROR's GAME LAUNCHER", True, (20,20,20))
+    gameDisplay.blit(maintextsurface,(SCREENSIZE[0]//4 - 100,50))
     
+    if somethingCrashed:
+        gameDisplay.blit(errortextsurface,(0,SCREENSIZE[1]-50))
 
     pygame.display.flip()
     
     
 pygame.quit()
+#quit() # bad for pyinstalker?
+
+
+"""
+
+each game must have a function with all the code of the game. this is because all the code is run when you import the game, but only the first time.
+
+things ouside of the main function will not be run the second time you play. importing stuff and pygame init are unnecessary since 
 
 
 
+games can be imported at the top of this program or when you want to run their main fcn. doesnt matter that much. mostly about startup times.
+
+afaik the fonts work with pyinstaller. dont know which fonts but whatever
+
+
+"""
