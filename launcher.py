@@ -2,8 +2,22 @@ import pygame
 import time
 import os
 import pygame_gui
+import sys
 
-os.environ['SDL_VIDEO_CENTERED'] = '1'
+
+"""
+pyinstaller command:
+
+pyinstaller launcher.py --onefile --noconsole --icon=icon.ico --add-data "launcherFiles;launcherFiles" --name GameLauncher
+"""
+
+os.environ['SDL_VIDEO_CENTERED'] = '1' #? dafuq is this
+
+assets_path = None
+if hasattr(sys, '_MEIPASS'):
+    assets_path = os.path.join(sys._MEIPASS, "launcherFiles")
+else:
+    assets_path = "launcherFiles"
 
 clock = pygame.time.Clock()
 pygame.init()
@@ -15,11 +29,13 @@ infoObject = pygame.display.Info()
 SCREENSIZE = (infoObject.current_w, infoObject.current_h)
 #print(SCREENSIZE)
 gameDisplay = pygame.display.set_mode(SCREENSIZE)
+gameDisplay.blit(pygame.transform.scale(pygame.image.load(os.path.join(assets_path, "loading.png")),SCREENSIZE),(0,0))
+pygame.display.update()
 
 pygame.display.set_caption("brors python game launcher")
 #pygame.display.set_icon(pygame.image.load(os.path.join("assets", "textures", "player", "player.png")))
 
-mainImage = pygame.image.load(os.path.join("LAUNCHERCOVERART.png"))
+mainImage = pygame.image.load(os.path.join(assets_path,"LAUNCHERCOVERART.png"))
 mainImage = pygame.transform.scale(mainImage, SCREENSIZE)
 
 managers={
@@ -72,20 +88,20 @@ while jump_out == False:
             #buttons
             try:
                 if event.ui_element == buttons[0]:
-                    import fightingGame
-                    fightingGame.fightingGameMain()
+                    import launcherFiles.fightingGame
+                    launcherFiles.fightingGame.fightingGameMain()
                 elif event.ui_element == buttons[1]:
-                    import houseReview
-                    houseReview.houseReviewMain()
+                    import launcherFiles.houseReview
+                    launcherFiles.houseReview.houseReviewMain()
                 elif event.ui_element == buttons[2]:
-                    import roguelikeGame
-                    roguelikeGame.roguelikeGameMain()
+                    import launcherFiles.roguelikeGame
+                    launcherFiles.roguelikeGame.roguelikeGameMain()
                 elif event.ui_element == buttons[3]:
-                    import blastGame
-                    blastGame.blastGameMain()
+                    import launcherFiles.blastGame
+                    launcherFiles.blastGame.blastGameMain()
                 elif event.ui_element == buttons[4]:
-                    import jumpingGame
-                    jumpingGame.jumpingGameMain()
+                    import launcherFiles.jumpingGame
+                    launcherFiles.jumpingGame.jumpingGameMain()
                 elif event.ui_element == buttons[5]:
                     jump_out = True
                 else:
