@@ -29,7 +29,7 @@ def roguelikeGameMain():
     """
 
     clock = pygame.time.Clock()
-    filepath = "roguelikeGameFiles"
+    #filepath = "roguelikeGameFiles"
     SOUND_PATH = os.path.join(filepath, "sounds")
     pygame.init()
     info = (
