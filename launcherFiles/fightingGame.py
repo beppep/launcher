@@ -5825,11 +5825,13 @@ def fightingGameMain():
                     num = -1
                 time.sleep(0.1)
 
+            gameDisplay.blit(pygame.transform.scale(gameDisplay, (displaySize[0]*displaySize[0]//1000,displaySize[1]*displaySize[1]//600)), (0,0))
             pygame.display.update()
             clock.tick(60)
             time.sleep(lag)
 
-        return
+        State.jump_out = True
+        return ([Puncher]*7, [0]*7, sticks) # i want to terminate fightingGame.fightingGameMain but not Launcher.main
 
 
     def winAnimation():
@@ -5848,14 +5850,18 @@ def fightingGameMain():
             gameDisplay.blit(da_player_that_won.image[0], (230, 110))
             gameDisplay.blit(textsurface, (60, 400))
 
+            gameDisplay.blit(pygame.transform.scale(gameDisplay, (displaySize[0]*displaySize[0]//1000,displaySize[1]*displaySize[1]//600)), (0,0))
             pygame.display.update()
             clock.tick(60)
             # time.sleep(lag)
 
+    pygame.init()
+    info = (
+        pygame.display.Info()
+    )  # You have to call this before pygame.display.set_mode()
+    displaySize = (info.current_w, info.current_h)
+    gameDisplay = pygame.display.set_mode(displaySize)#, pygame.FULLSCREEN)
 
-    gameDisplay = pygame.display.set_mode(
-        (1000, 600),
-    )  # pygame.FULLSCREEN)
     backgrounds = []
     for name in [
         "LDbackground.png",
@@ -5992,6 +5998,7 @@ def fightingGameMain():
         for player in Projectile.projectiles + Player.players:
             player.draw()
 
+        gameDisplay.blit(pygame.transform.scale(gameDisplay, (displaySize[0]*displaySize[0]//1000,displaySize[1]*displaySize[1]//600)), (0,0))
         pygame.display.update()
         clock.tick(State.frameRate)
 

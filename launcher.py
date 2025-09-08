@@ -48,7 +48,7 @@ myfont2 = pygame.font.SysFont('Calibri', 20)
 somethingCrashed = 0
 
 dagames = ["Fighting Game","House Review","Roguelike Game","Space Shooter","Jumping Game","Quit"]
-dahelptexts = ["1-2 Players.\n\nA classic fighting game with many characters!\n\n(Press number keys to change the controls)\n(Controller support maybe)","1 Player.\n\nA relaxing stressful game about building and selling houses.","1 Player.\n\nA classic top-down roguelike.","1 Player.\n\nShoot ships in space and stuff.\n\n(Controller support)","2 Players.\n\nA cool game about jumping over each other","0 Players.\n\nNot very fun. Not recommended."]
+dahelptexts = ["1-2 Players.\n\nA classic fighting game with many characters!\n\n(Press number keys to change the controls),\n\n(Controller support)","1 Player.\n\nA relaxing stressful game about building and selling houses.","1 Player.\n\nA classic top-down roguelike.","1 Player.\n\nShoot ships in space and stuff.\n\n(Controller support)","2 Players.\n\nA cool game about jumping over each other.","0 Players.\n\nNot very fun. Not recommended."]
 helptext = ""
 
 buttons = []
@@ -76,13 +76,13 @@ while jump_out == False:
                 jump_out = True
 
         if event.type == pygame_gui.UI_BUTTON_ON_HOVERED:
-            helptext = dahelptexts[buttons.index(event.ui_element)]
+            helptext = dagames[buttons.index(event.ui_element)] + "\n\n" + dahelptexts[buttons.index(event.ui_element)]
             help_textbox.html_text=helptext
             help_textbox.rebuild()
-        if event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
-            helptext = ""
-            help_textbox.html_text=helptext
-            help_textbox.rebuild()
+        #if event.type == pygame_gui.UI_BUTTON_ON_UNHOVERED:
+         #   helptext = ""
+          #  help_textbox.html_text=helptext
+           # help_textbox.rebuild()
 
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             #buttons
